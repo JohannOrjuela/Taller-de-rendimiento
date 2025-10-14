@@ -4,6 +4,9 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,9 +34,11 @@ public class ProductService {
      * Busca productos basándose en filtros de búsqueda, categoría y precio.
      * Es un método bloqueante que accede directamente a la BD.
      */
-    public List<Producto> buscarProductos(String query, String category, BigDecimal minPrice) {
-        return productoRepository.searchProducts(query, category, minPrice);
+    public Page<Producto> buscarProductos(String query, String category, BigDecimal minPrice, Pageable pageable) {
+        return productoRepository.searchProducts(query, category, minPrice, pageable);
     }
+
+    
 
     /**
      * Obtiene los detalles de un producto por su ID.
