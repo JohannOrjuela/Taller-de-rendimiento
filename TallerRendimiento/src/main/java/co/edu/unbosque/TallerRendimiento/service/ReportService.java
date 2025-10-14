@@ -5,6 +5,7 @@ import java.time.YearMonth;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ public class ReportService {
      * Genera el reporte de productos más vendidos.
      * Este reporte utiliza una consulta pesada a la base de datos (requisito de Camila).
      */
+    @Cacheable(value = "productCache", key = "'topSelling:' + #startDate") // Clave específica para evitar colisión.
     @Transactional(readOnly = true) 
     public List<Producto> obtenerProductosMasVendidos(LocalDate startDate) {
         
