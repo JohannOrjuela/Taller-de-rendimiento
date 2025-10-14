@@ -21,8 +21,8 @@ public interface ProductoRepository extends JpaRepository<Producto, Integer> {
     // @Query("SELECT p FROM Producto p " +
     //        "JOIN p.subcategoria s " +
     //        "JOIN s.categoria c " +
-    //        "WHERE (:query IS NULL OR LOWER(p.nombreProducto) LIKE LOWER(CONCAT('%', :query, '%'))) " +
-    //        "AND (:category IS NULL OR LOWER(c.nombreCategoria) = LOWER(:category)) " +
+    //        "WHERE (:query IS NULL OR LOWER(p.nombreProducto) LIKE LOWER(CONCAT('%', COALESCE(:query, '%')))) " +
+    //        "AND (:category IS NULL OR LOWER(c.nombreCategoria) = LOWER(COALESCE(:category))) " +
     //        "AND (:minPrice IS NULL OR p.precioProducto >= :minPrice)")
     // List<Producto> searchProducts(
     //         @Param("query") String query,

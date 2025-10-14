@@ -8,6 +8,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +36,7 @@ public class ProductService {
      * Busca productos basándose en filtros de búsqueda, categoría y precio.
      * Es un método bloqueante que accede directamente a la BD.
      */
+    @Cacheable("productCache")
     public Page<Producto> buscarProductos(String query, String category, BigDecimal minPrice, Pageable pageable) {
         return productoRepository.searchProducts(query, category, minPrice, pageable);
     }
@@ -43,6 +46,7 @@ public class ProductService {
     /**
      * Obtiene los detalles de un producto por su ID.
      */
+    @Cacheable(value = "productCache", key = "#id")
     public Optional<Producto> obtenerDetallesProducto(Integer id) {
         // En la línea base, la obtención de detalles cargará todas las relaciones (Comentarios, Calificaciones)
         // por defecto (Lazy loading con acceso dentro de una transacción o Eager loading).
@@ -54,6 +58,7 @@ public class ProductService {
      * Esta es la lógica crítica para Óscar en bodega (debe reflejar el cambio en < 400ms).
      */
     @Transactional
+    @CacheEvict(value = "productCache", key = "#productId") 
     public Optional<Producto> actualizarStock(Integer productId, Integer quantityChange, String description, Integer userId) {
         Optional<Producto> productOpt = productoRepository.findById(productId);
         Optional<Usuario> userOpt = usuarioRepository.findById(userId);
@@ -87,6 +92,7 @@ public class ProductService {
     /**
      * Obtiene los productos con bajo stock.
      */
+    @Cacheable("productCache")
     public List<Producto> obtenerProductosBajoStock(Integer threshold) {
         return productoRepository.findByCantidadProductoLessThan(threshold);
     }
