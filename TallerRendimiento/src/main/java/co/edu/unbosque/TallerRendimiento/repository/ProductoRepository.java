@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,16 +17,31 @@ import co.edu.unbosque.TallerRendimiento.model.Producto;
 public interface ProductoRepository extends JpaRepository<Producto, Integer> {
 
     // GET /api/products/search: Búsqueda sin optimización (LIKE '%producto%') 
-    @Query("SELECT p FROM Producto p " +
-           "JOIN p.subcategoria s " +
-           "JOIN s.categoria c " +
-           "WHERE (:query IS NULL OR LOWER(p.nombreProducto) LIKE LOWER(CONCAT('%', :query, '%'))) " +
-           "AND (:category IS NULL OR LOWER(c.nombreCategoria) = LOWER(:category)) " +
-           "AND (:minPrice IS NULL OR p.precioProducto >= :minPrice)")
-    List<Producto> searchProducts(
-            @Param("query") String query,
-            @Param("category") String category,
-            @Param("minPrice") BigDecimal minPrice);
+
+    // @Query("SELECT p FROM Producto p " +
+    //        "JOIN p.subcategoria s " +
+    //        "JOIN s.categoria c " +
+    //        "WHERE (:query IS NULL OR LOWER(p.nombreProducto) LIKE LOWER(CONCAT('%', :query, '%'))) " +
+    //        "AND (:category IS NULL OR LOWER(c.nombreCategoria) = LOWER(:category)) " +
+    //        "AND (:minPrice IS NULL OR p.precioProducto >= :minPrice)")
+    // List<Producto> searchProducts(
+    //         @Param("query") String query,
+    //         @Param("category") String category,
+    //         @Param("minPrice") BigDecimal minPrice);
+
+     @Query("SELECT p FROM Producto p " +
+        "JOIN p.subcategoria s " +
+        "JOIN s.categoria c " +
+        // CORRECCIÓN CON COALESCE: Asegura que LOWER() no reciba un NULL sin tipo.
+        // Si :query es NULL, se compara con sí mismo (lo cual será TRUE si se pasa la primera condición)
+        "WHERE (LOWER(p.nombreProducto) LIKE LOWER(CONCAT('%', COALESCE(:query, p.nombreProducto), '%')) OR :query IS NULL) " +
+        "AND (LOWER(c.nombreCategoria) = LOWER(COALESCE(:category, c.nombreCategoria)) OR :category IS NULL) " +
+        "AND (:minPrice IS NULL OR p.precioProducto >= :minPrice)")
+    Page<Producto> searchProducts(
+        @Param("query") String query,
+        @Param("category") String category,
+        @Param("minPrice") BigDecimal minPrice,
+        Pageable pageable);
 
     // GET /api/inventory/low-stock
     List<Producto> findByCantidadProductoLessThan(Integer threshold);
