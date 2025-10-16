@@ -1,13 +1,9 @@
 package co.edu.unbosque.tallerrendimientowebflux.controller;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import co.edu.unbosque.tallerrendimientowebflux.dto.DetalleProductoDTO;
@@ -37,6 +33,7 @@ public class ProductoController {
         responses = {
             @ApiResponse(responseCode = "200", description = "Lista de productos que coinciden con los criterios de búsqueda."),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor.")
+            
         }
     )
     @GetMapping("/search")
@@ -56,8 +53,7 @@ public class ProductoController {
         description = "Recupera los detalles completos de un producto, incluyendo su calificación promedio, conteo de comentarios, subcategoría y nombre de categoría. Esta es una operación de alta concurrencia (Mono.zip).",
         responses = {
             @ApiResponse(responseCode = "200", description = "Detalles del producto recuperados exitosamente."),
-            @ApiResponse(responseCode = "404", description = "Producto no encontrado."),
-            @ApiResponse(responseCode = "500", description = "Error en la orquestación de datos reactivos.")
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor.")
         }
     )
     @GetMapping("/{id}")
@@ -67,19 +63,4 @@ public class ProductoController {
         return productoService.obtenerDetallesPorId(id);
     }
 
-    @Operation(
-        summary = "Crear un nuevo producto",
-        description = "Guarda un nuevo producto en el catálogo.",
-        responses = {
-            @ApiResponse(responseCode = "201", description = "Producto creado exitosamente."),
-            @ApiResponse(responseCode = "400", description = "Datos de entrada inválidos.")
-        }
-    )
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public Mono<ProductoDTO> crearProducto(
-            @Parameter(description = "Datos del nuevo producto a crear.")
-            @RequestBody ProductoDTO productoDTO) {
-        return productoService.crearProducto(productoDTO);
-    }
 }

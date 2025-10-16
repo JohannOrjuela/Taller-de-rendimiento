@@ -1,9 +1,10 @@
 package co.edu.unbosque.tallerrendimientowebflux.model;
 
+import java.time.LocalDate;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
-import java.time.LocalDate;
 
 @Table("comentario")
 public class Comentario {
@@ -21,16 +22,11 @@ public class Comentario {
     @Column("id_producto") 
     private final Integer idProducto;
 
-    @Column("id_usuario") 
-    private final Integer idUsuario;
-
-    public Comentario(Integer idComentario, String contenidoComentario, LocalDate fechaComentario, Integer idProducto,
-            Integer idUsuario) {
-        this.idComentario = idComentario;
+    public Comentario(String contenidoComentario, LocalDate fechaComentario, Integer idComentario, Integer idProducto) {
         this.contenidoComentario = contenidoComentario;
         this.fechaComentario = fechaComentario;
+        this.idComentario = idComentario;
         this.idProducto = idProducto;
-        this.idUsuario = idUsuario;
     }
 
     public Integer getIdComentario() {
@@ -49,9 +45,4 @@ public class Comentario {
         return idProducto;
     }
 
-    public Integer getIdUsuario() {
-        return idUsuario;
-    } 
-
-    
 }

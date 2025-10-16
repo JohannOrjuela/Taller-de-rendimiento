@@ -1,30 +1,34 @@
 package co.edu.unbosque.tallerrendimientowebflux.dto;
 
+import java.math.BigDecimal;
+
+import org.springframework.data.annotation.PersistenceCreator;
+
 public class TopSellingReportDTO {
 
-    private final Long idProducto;
-    private final String nombreProducto;
-    private final Long unidadesVendidas; // Calculado (COUNT de Trans_Inventario)
-    private final Double ingresosGenerados; // Calculado (SUM)
-
-    public TopSellingReportDTO(Long idProducto, String nombreProducto, Long unidadesVendidas, Double ingresosGenerados) {
-        this.idProducto = idProducto;
-        this.nombreProducto = nombreProducto;
-        this.unidadesVendidas = unidadesVendidas;
-        this.ingresosGenerados = ingresosGenerados;
+    private final Long idproducto;
+    private final String nombreproducto;
+    private final Long unidadesvendidas; 
+    private final BigDecimal ingresosgenerados; 
+    
+    @PersistenceCreator
+    public TopSellingReportDTO(Long idproducto, String nombreproducto, Long unidadesvendidas, BigDecimal ingresosgenerados) {
+        this.idproducto = idproducto;
+        this.nombreproducto = nombreproducto;
+        this.unidadesvendidas = unidadesvendidas;
+        this.ingresosgenerados = ingresosgenerados;
     }
 
-    // Getters (solo lectura)
     public Long getIdProducto() { 
-        return idProducto; 
+        return idproducto; 
     }
     public String getNombreProducto() { 
-        return nombreProducto; 
+        return nombreproducto; 
     }
     public Long getUnidadesVendidas() { 
-        return unidadesVendidas; 
+        return unidadesvendidas; 
     }
-    public Double getIngresosGenerados() { 
-        return ingresosGenerados; 
+    public BigDecimal getIngresosGenerados() { 
+        return ingresosgenerados; 
     }
 }

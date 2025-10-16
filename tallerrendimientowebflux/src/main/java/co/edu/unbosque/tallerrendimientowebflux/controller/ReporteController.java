@@ -15,7 +15,7 @@ import reactor.core.publisher.Flux;
 
 @RestController
 @RequestMapping("/api/reports")
-@Tag(name = "Reportes", description = "Generación de informes de alto rendimiento para ventas.")
+@Tag(name = "Reportes", description = "Generación de informes para ventas.")
 public class ReporteController {
 
     private final ReporteService reporteService;
@@ -23,30 +23,18 @@ public class ReporteController {
     public ReporteController(ReporteService reporteService) {
         this.reporteService = reporteService;
     }
-
-    @Operation(
-        summary = "Reporte de Top Ventas por Periodo",
-        description = "Obtiene los 10 productos más vendidos en un periodo de tiempo dinámico (ej. 'month', 'year').",
-        responses = {
-            @ApiResponse(responseCode = "200", description = "Reporte generado con éxito.")
-        }
-    )
-    @GetMapping("/top-selling")
-    public Flux<TopSellingReportDTO> getTopSellingProductsByPeriod(
-            @Parameter(description = "Periodo de tiempo ('month' o 'year'). Por defecto: 'month'.")
-            @RequestParam(defaultValue = "month") String period) {
-        
-        return reporteService.findTopSellingProductsByPeriod(period);
-    }
     
     @Operation(
         summary = "Reporte de Top Ventas desde una Fecha Exacta",
         description = "Obtiene los 10 productos más vendidos a partir de una fecha específica.",
         responses = {
             @ApiResponse(responseCode = "200", description = "Reporte generado con éxito."),
-            @ApiResponse(responseCode = "400", description = "Formato de fecha inválido.")
+            @ApiResponse(responseCode = "400", description = "Formato de fecha inválido."),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor.")
+
         }
     )
+
     @GetMapping("/top-selling/by-date")
     public Flux<TopSellingReportDTO> getTopSellingProductsByExactDate(
             @Parameter(description = "Fecha inicial en formato YYYY-MM-DD.")

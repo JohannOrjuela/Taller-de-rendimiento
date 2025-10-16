@@ -11,8 +11,8 @@ public class DetalleProductoDTO {
     private final Integer stock;
     private final String nombreSubcategoria;
     private final String nombreCategoria;
-    private final Double promedioCalificacion; // Calculado (AVG)
-    private final Long totalComentarios;       // Calculado (COUNT)
+    private final Double promedioCalificacion; // Calculado 
+    private final Long totalComentarios;       // Calculado 
     private final List<ComentarioDTO> comentarios; // Lista anidada
 
     public DetalleProductoDTO(Long id, String nombre, String descripcion, Double precio, Integer stock, String nombreSubcategoria, String nombreCategoria, Double promedioCalificacion, Long totalComentarios, List<ComentarioDTO> comentarios) {

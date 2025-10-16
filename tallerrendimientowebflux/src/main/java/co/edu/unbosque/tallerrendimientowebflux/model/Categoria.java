@@ -28,5 +28,4 @@ public class Categoria {
         return nombreCategoria;
     }
 
-   
 }

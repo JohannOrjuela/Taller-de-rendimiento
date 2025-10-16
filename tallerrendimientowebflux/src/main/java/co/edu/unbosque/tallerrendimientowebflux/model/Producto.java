@@ -7,7 +7,7 @@ import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table; 
 @Table("producto")
 public class Producto {
-
+    
     @Id
     @Column("id_producto")
     private final Integer idProducto;
@@ -26,8 +26,8 @@ public class Producto {
 
     @Column("id_subcategoria") 
     private final Integer idSubcategoria;
-
-
+    
+    
     public Producto(Integer idProducto, String nombreProducto, BigDecimal precioProducto, String descripcionProducto,
             Integer cantidadProducto, Integer idSubcategoria) {
         this.idProducto = idProducto;
@@ -37,17 +37,7 @@ public class Producto {
         this.cantidadProducto = cantidadProducto;
         this.idSubcategoria = idSubcategoria;
     }
-    // AGREGAR ESTE CONSTRUCTOR A TU CLASE Producto.java
-    public Producto(String nombreProducto, BigDecimal precioProducto, String descripcionProducto,
-                    Integer cantidadProducto, Integer idSubcategoria) {
-        // El ID se inicializa a null para que R2DBC lo genere automáticamente al guardar
-        this.idProducto = null; 
-        this.nombreProducto = nombreProducto;
-        this.precioProducto = precioProducto;
-        this.descripcionProducto = descripcionProducto;
-        this.cantidadProducto = cantidadProducto;
-        this.idSubcategoria = idSubcategoria;
-    }
+   
     public Integer getIdProducto() {
         return idProducto;
     }
@@ -72,5 +62,5 @@ public class Producto {
         return idSubcategoria;
     }
 
-
+    
 }
