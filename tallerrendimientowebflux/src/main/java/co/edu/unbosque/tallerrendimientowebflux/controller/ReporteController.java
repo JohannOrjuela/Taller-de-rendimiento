@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import co.edu.unbosque.tallerrendimientowebflux.dto.TopSellingReportDTO;
+import co.edu.unbosque.tallerrendimientowebflux.dto.ProductoReporteDTO;
 import co.edu.unbosque.tallerrendimientowebflux.service.ReporteService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -36,7 +36,7 @@ public class ReporteController {
     )
 
     @GetMapping("/top-selling/by-date")
-    public Flux<TopSellingReportDTO> getTopSellingProductsByExactDate(
+    public Flux<ProductoReporteDTO> getTopSellingProductsByExactDate(
             @Parameter(description = "Fecha inicial en formato YYYY-MM-DD.")
             @RequestParam String startDate) {
         

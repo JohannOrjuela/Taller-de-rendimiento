@@ -135,8 +135,7 @@ public class ProductoService {
     private ComentarioDTO toComentarioDTOAnonymized(Comentario comentario) {
         return new ComentarioDTO(
             comentario.getContenidoComentario(),
-            comentario.getFechaComentario(),
-            "Anónimo" 
+            comentario.getFechaComentario()
         );
     }
     

@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 
 import org.springframework.data.annotation.PersistenceCreator;
 
-public class TopSellingReportDTO {
+public class ProductoReporteDTO {
 
     private final Long idproducto;
     private final String nombreproducto;
@@ -12,7 +12,7 @@ public class TopSellingReportDTO {
     private final BigDecimal ingresosgenerados; 
     
     @PersistenceCreator
-    public TopSellingReportDTO(Long idproducto, String nombreproducto, Long unidadesvendidas, BigDecimal ingresosgenerados) {
+    public ProductoReporteDTO(Long idproducto, String nombreproducto, Long unidadesvendidas, BigDecimal ingresosgenerados) {
         this.idproducto = idproducto;
         this.nombreproducto = nombreproducto;
         this.unidadesvendidas = unidadesvendidas;

@@ -4,7 +4,7 @@ import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import org.springframework.stereotype.Repository;
 
-import co.edu.unbosque.tallerrendimientowebflux.dto.TopSellingReportDTO;
+import co.edu.unbosque.tallerrendimientowebflux.dto.ProductoReporteDTO;
 import co.edu.unbosque.tallerrendimientowebflux.model.TransInventario;
 import reactor.core.publisher.Flux;
 
@@ -26,5 +26,5 @@ public interface TransInventarioReactiveRepository extends R2dbcRepository<Trans
             ORDER BY unidadesvendidas DESC
             LIMIT 10
             """)
-    Flux<TopSellingReportDTO> findTopSellingProducts(String startDate);
+    Flux<ProductoReporteDTO> findTopSellingProducts(String startDate);
 }

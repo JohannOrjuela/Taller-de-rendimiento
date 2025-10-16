@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import co.edu.unbosque.tallerrendimientowebflux.dto.TopSellingReportDTO;
+import co.edu.unbosque.tallerrendimientowebflux.dto.ProductoReporteDTO;
 import co.edu.unbosque.tallerrendimientowebflux.repository.TransInventarioReactiveRepository;
 import reactor.core.publisher.Flux;
 
@@ -23,7 +23,7 @@ public class ReporteService {
     // -----------------------------------------------------------------
     //TOP VENTAS POR FECHA EXACTA (/reports/top-selling/by-date)
     // -----------------------------------------------------------------
-    public Flux<TopSellingReportDTO> findTopSellingProductsByExactDate(String startDate) { 
+    public Flux<ProductoReporteDTO> findTopSellingProductsByExactDate(String startDate) { 
         try {
             LocalDate startDateString = LocalDate.parse(startDate);
             return transInventarioRepository.findTopSellingProducts(startDate); 

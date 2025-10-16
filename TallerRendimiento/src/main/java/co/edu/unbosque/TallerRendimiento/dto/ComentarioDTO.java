@@ -6,16 +6,12 @@ public class ComentarioDTO {
 
     private final String contenido;
     private final LocalDate fecha;
-    private final String usuarioNombre; // Nombre del usuario que comentó
 
-    // Constructor completo para mapeo de salida
-    public ComentarioDTO(String contenido, LocalDate fecha, String usuarioNombre) {
+    public ComentarioDTO(String contenido, LocalDate fecha) {
         this.contenido = contenido;
         this.fecha = fecha;
-        this.usuarioNombre = usuarioNombre;
     }
-
-    // Getters (solo lectura)
+  
     public String getContenido() {
         return contenido;
     }
@@ -24,7 +20,4 @@ public class ComentarioDTO {
         return fecha;
     }
 
-    public String getUsuarioNombre() {
-        return usuarioNombre;
-    }
 }
