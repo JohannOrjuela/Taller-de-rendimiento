@@ -1,5 +1,12 @@
 package co.edu.unbosque.TallerRendimiento.service;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+
 import co.edu.unbosque.TallerRendimiento.dto.ComentarioDTO;
 import co.edu.unbosque.TallerRendimiento.dto.DetalleProductoDTO;
 import co.edu.unbosque.TallerRendimiento.dto.ProductoDTO;
@@ -7,14 +14,16 @@ import co.edu.unbosque.TallerRendimiento.model.Categoria;
 import co.edu.unbosque.TallerRendimiento.model.Comentario;
 import co.edu.unbosque.TallerRendimiento.model.Producto;
 import co.edu.unbosque.TallerRendimiento.model.Subcategoria;
-import co.edu.unbosque.TallerRendimiento.repository.ProductoRepository;
-import co.edu.unbosque.TallerRendimiento.repository.ComentarioRepository;
+import co.edu.unbosque.TallerRendimiento.model.TransInventario;
+import co.edu.unbosque.TallerRendimiento.model.Usuario;
 import co.edu.unbosque.TallerRendimiento.repository.CalificacionRepository;
+import co.edu.unbosque.TallerRendimiento.repository.ComentarioRepository;
+import co.edu.unbosque.TallerRendimiento.repository.ProductoRepository;
+import co.edu.unbosque.TallerRendimiento.repository.TransInventarioRepository;
+import co.edu.unbosque.TallerRendimiento.repository.UsuarioRepository;
+import jakarta.transaction.Transactional;
 
-import org.springframework.stereotype.Service;
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.stream.Collectors;
+
 
 @Service
 public class ProductoService {
@@ -22,13 +31,19 @@ public class ProductoService {
     private final ProductoRepository productoRepository;
     private final ComentarioRepository comentarioRepository;
     private final CalificacionRepository calificacionRepository;
+    private final TransInventarioRepository transInventarioRepository;
+    private final UsuarioRepository usuarioRepository;
 
     public ProductoService(ProductoRepository productoRepository, 
                            ComentarioRepository comentarioRepository, 
-                           CalificacionRepository calificacionRepository) {
+                           CalificacionRepository calificacionRepository,
+                           TransInventarioRepository transInventarioRepository,
+                           UsuarioRepository usuarioRepository) {
         this.productoRepository = productoRepository;
         this.comentarioRepository = comentarioRepository;
         this.calificacionRepository = calificacionRepository;
+        this.transInventarioRepository = transInventarioRepository;
+        this.usuarioRepository = usuarioRepository;
     }
 
     public List<ProductoDTO> searchProducts(String query, String category, BigDecimal minPrice) {
@@ -60,6 +75,34 @@ public class ProductoService {
                 .collect(Collectors.toList());
     }
 
+
+   @Transactional 
+    public void actualizarStockPorRecepcionUnitaria(Integer idProducto, Integer cantidadRecibida, Integer idUsuarioLogueado) {
+        
+        Usuario usuario = usuarioRepository.findById(idUsuarioLogueado)
+                            .orElseThrow(() -> new IllegalArgumentException("Error de auditoría: Usuario no encontrado.")); 
+        
+        int filasActualizadas = productoRepository.sumarStockPorIdProducto(
+            idProducto, 
+            cantidadRecibida
+        );
+        
+        if (filasActualizadas == 0) {
+            throw new RuntimeException("Producto no encontrado con ID: " + idProducto); 
+        }
+
+        Producto productoRef = productoRepository.getReferenceById(idProducto); 
+        
+        TransInventario trans = new TransInventario();
+        trans.setProducto(productoRef);
+        trans.setUsuario(usuario);
+        trans.setTipoTransInventario("Entrada");
+        trans.setCantidadTransInventario(cantidadRecibida); 
+        trans.setFechaTransInventario(LocalDate.now());
+        trans.setDescripcionTransInventario("Recepción unitaria de mercancía (vía URL).");
+        
+        transInventarioRepository.save(trans); 
+    }
 
    private ProductoDTO mapToProductoDTO(Producto p) {
        

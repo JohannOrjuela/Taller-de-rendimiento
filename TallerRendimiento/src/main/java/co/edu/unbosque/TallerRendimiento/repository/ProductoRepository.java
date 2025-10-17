@@ -1,14 +1,17 @@
 package co.edu.unbosque.TallerRendimiento.repository;
 
-import co.edu.unbosque.TallerRendimiento.model.Producto;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Optional;
+import co.edu.unbosque.TallerRendimiento.model.Producto;
+import jakarta.transaction.Transactional;
 
 @Repository
 public interface ProductoRepository extends JpaRepository<Producto, Integer> {
@@ -29,4 +32,9 @@ Optional<Producto> findById(Integer id);
 
     List<Producto> findByCantidadProductoLessThan(Integer threshold);
 
+
+  @Modifying
+  @Transactional
+  @Query("UPDATE Producto p SET p.cantidadProducto = p.cantidadProducto + :cantidad WHERE p.idProducto = :idProducto")
+  int sumarStockPorIdProducto(@Param("idProducto") Integer idProducto, @Param("cantidad") Integer cantidad);
 }
