@@ -1,34 +1,35 @@
 package co.edu.unbosque.tallerrendimientowebflux.model;
 
+import java.time.LocalDate;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
-import java.time.LocalDate;
 
 @Table("trans_inventario")
 public class TransInventario {
 
     @Id
     @Column("id_trans_inventario")
-    private final Integer idTransInventario;
+    private Integer idTransInventario;
 
     @Column("tipo_trans_inventario")
-    private final String tipoTransInventario;
+    private String tipoTransInventario;
 
     @Column("fecha_trans_inventario")
-    private final LocalDate fechaTransInventario;
+    private LocalDate fechaTransInventario;
 
     @Column("cantidad_trans_inventario")
-    private final Integer cantidadTransInventario;
+    private Integer cantidadTransInventario;
 
     @Column("descripcion_trans_inventario")
-    private final String descripcionTransInventario;
+    private String descripcionTransInventario;
 
     @Column("id_producto") 
-    private final Integer idProducto;
+    private Integer idProducto;
 
     @Column("id_usuario") 
-    private final Integer idUsuario;
+    private Integer idUsuario;
 
     
     public TransInventario(Integer idTransInventario, String tipoTransInventario, LocalDate fechaTransInventario,
@@ -42,33 +43,69 @@ public class TransInventario {
         this.idUsuario = idUsuario;
     }
 
+    public TransInventario() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+
     public Integer getIdTransInventario() {
         return idTransInventario;
     }
+
 
     public String getTipoTransInventario() {
         return tipoTransInventario;
     }
 
+
     public LocalDate getFechaTransInventario() {
         return fechaTransInventario;
     }
+
 
     public Integer getCantidadTransInventario() {
         return cantidadTransInventario;
     }
 
+
     public String getDescripcionTransInventario() {
         return descripcionTransInventario;
     }
+
 
     public Integer getIdProducto() {
         return idProducto;
     }
 
+
     public Integer getIdUsuario() {
         return idUsuario;
     }
+   public void setIdTransInventario(Integer idTransInventario) {
+        this.idTransInventario = idTransInventario;
+    }
 
-   
+    public void setTipoTransInventario(String tipoTransInventario) {
+        this.tipoTransInventario = tipoTransInventario;
+    }
+
+    public void setFechaTransInventario(LocalDate fechaTransInventario) {
+        this.fechaTransInventario = fechaTransInventario;
+    }
+
+    public void setCantidadTransInventario(Integer cantidadTransInventario) {
+        this.cantidadTransInventario = cantidadTransInventario;
+    }
+
+    public void setDescripcionTransInventario(String descripcionTransInventario) {
+        this.descripcionTransInventario = descripcionTransInventario;
+    }
+
+    public void setIdProducto(Integer idProducto) {
+        this.idProducto = idProducto;
+    }
+
+    public void setIdUsuario(Integer idUsuario) {
+        this.idUsuario = idUsuario;
+    }
 }

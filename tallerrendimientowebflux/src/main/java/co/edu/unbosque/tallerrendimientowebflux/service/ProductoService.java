@@ -1,6 +1,7 @@
 package co.edu.unbosque.tallerrendimientowebflux.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -11,10 +12,13 @@ import co.edu.unbosque.tallerrendimientowebflux.dto.ProductoDTO;
 import co.edu.unbosque.tallerrendimientowebflux.model.Comentario;
 import co.edu.unbosque.tallerrendimientowebflux.model.Producto;
 import co.edu.unbosque.tallerrendimientowebflux.model.Subcategoria;
+import co.edu.unbosque.tallerrendimientowebflux.model.TransInventario;
 import co.edu.unbosque.tallerrendimientowebflux.repository.CalificacionReactiveRepository;
 import co.edu.unbosque.tallerrendimientowebflux.repository.ComentarioReactiveRepository; 
 import co.edu.unbosque.tallerrendimientowebflux.repository.ProductoReactiveRepository;
 import co.edu.unbosque.tallerrendimientowebflux.repository.SubcategoriaReactiveRepository;
+import co.edu.unbosque.tallerrendimientowebflux.repository.TransInventarioReactiveRepository;
+import co.edu.unbosque.tallerrendimientowebflux.repository.UsuarioReactiveRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
@@ -26,15 +30,21 @@ public class ProductoService {
     private final CalificacionReactiveRepository calificacionRepository;
     private final ComentarioReactiveRepository comentarioRepository;
     private final SubcategoriaReactiveRepository subcategoriaRepository; 
+    private final UsuarioReactiveRepository usuarioRepository;
+    private final TransInventarioReactiveRepository transInventarioRepository;
 
     public ProductoService(ProductoReactiveRepository productoRepository,
                            CalificacionReactiveRepository calificacionRepository,
                            ComentarioReactiveRepository comentarioRepository,
-                           SubcategoriaReactiveRepository subcategoriaRepository) {
+                           SubcategoriaReactiveRepository subcategoriaRepository,
+                           UsuarioReactiveRepository usuarioRepository,
+                           TransInventarioReactiveRepository transInventarioRepository) {
         this.productoRepository = productoRepository;
         this.calificacionRepository = calificacionRepository;
         this.comentarioRepository = comentarioRepository;
         this.subcategoriaRepository = subcategoriaRepository;
+        this.usuarioRepository = usuarioRepository;
+        this.transInventarioRepository = transInventarioRepository;
     }
 
     // -----------------------------------------------------------------
@@ -113,6 +123,31 @@ public class ProductoService {
             
         }).map(this::mapTupleToProductoDTO);
 }
+public Mono<Void> actualizarStockPorRecepcionUnitaria(Integer idProducto, Integer cantidadRecibida, Integer idUsuarioLogueado) {
+        // ... (El cuerpo del método está bien)
+        // ... (Aquí se usa transInventarioRepository.save(trans).then())
+        return usuarioRepository.findById(idUsuarioLogueado)
+             .switchIfEmpty(Mono.error(new IllegalArgumentException("Error de auditoría: Usuario no encontrado.")))
+             .flatMap(usuario -> 
+                 productoRepository.sumarStockPorIdProducto(idProducto, cantidadRecibida)
+                 .flatMap(filasActualizadas -> {
+                     if (filasActualizadas == 0) {
+                         return Mono.error(new RuntimeException("Producto no encontrado con ID: " + idProducto));
+                     }
+                     // 4. Crear el registro de TransInventario
+                     TransInventario trans = new TransInventario();
+                     trans.setIdProducto(idProducto);
+                     trans.setIdUsuario(idUsuarioLogueado);
+                     trans.setTipoTransInventario("Entrada");
+                     trans.setCantidadTransInventario(cantidadRecibida); 
+                     trans.setFechaTransInventario(LocalDate.now());
+                     trans.setDescripcionTransInventario("Recepción unitaria de mercancía (vía WebFlux).");
+                     
+                     // 5. Guardar la transacción y completar el flujo
+                     return transInventarioRepository.save(trans).then(); 
+                 })
+             );
+    }
     // -----------------------------------------------------------------
     // MAPPERS PRIVADOS
     // -----------------------------------------------------------------

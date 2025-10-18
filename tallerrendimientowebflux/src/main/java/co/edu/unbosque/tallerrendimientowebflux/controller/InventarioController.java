@@ -1,6 +1,9 @@
 package co.edu.unbosque.tallerrendimientowebflux.controller;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -12,6 +15,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/api/inventory")
@@ -37,5 +41,29 @@ public class InventarioController {
             @RequestParam Integer threshold) {
         
         return productoService.findByCantidadProductoLessThan(threshold);
+    }
+
+    @Operation(
+        summary = "Actualizar stock de UN solo producto (WebFlux/No Bloqueante)",
+        description = "Recibe el producto y la cantidad como parámetros de consulta. **¡Optimizado para Concurrencia!**",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Stock actualizado correctamente."),
+            @ApiResponse(responseCode = "400", description = "Solicitud o datos inválidos.")
+        }
+    )
+    @PutMapping("/receive-merchandise")
+    public Mono<ResponseEntity<Object>> receiveMerchandise(
+        @RequestParam(name = "idProducto") Integer idProducto,
+        @RequestParam(name = "cantidadRecibida") Integer cantidadRecibida,
+        @RequestParam(name = "userId") Integer idUsuarioLogueado
+    ) { 
+        return productoService.actualizarStockPorRecepcionUnitaria(idProducto, cantidadRecibida, idUsuarioLogueado)
+            .thenReturn(ResponseEntity.ok().build()).onErrorResume(Throwable.class, e -> { 
+                
+                if (e instanceof IllegalArgumentException || e instanceof RuntimeException) {
+                     return Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).build()); 
+                }
+                return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()); 
+            });
     }
 }

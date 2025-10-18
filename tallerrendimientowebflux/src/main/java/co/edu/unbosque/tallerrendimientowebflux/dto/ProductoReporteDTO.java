@@ -6,29 +6,34 @@ import org.springframework.data.annotation.PersistenceCreator;
 
 public class ProductoReporteDTO {
 
-    private final Long idproducto;
-    private final String nombreproducto;
-    private final Long unidadesvendidas; 
-    private final BigDecimal ingresosgenerados; 
+    private final Long idProducto;
+    private final String nombreProducto;
+    private final Long unidadesVendidas; 
+    private final BigDecimal ingresosGenerados; 
     
     @PersistenceCreator
-    public ProductoReporteDTO(Long idproducto, String nombreproducto, Long unidadesvendidas, BigDecimal ingresosgenerados) {
-        this.idproducto = idproducto;
-        this.nombreproducto = nombreproducto;
-        this.unidadesvendidas = unidadesvendidas;
-        this.ingresosgenerados = ingresosgenerados;
+    public ProductoReporteDTO(Long idProducto, String nombreProducto, Long unidadesVendidas, BigDecimal ingresosGenerados) {
+        this.idProducto = idProducto;
+        this.nombreProducto = nombreProducto;
+        this.unidadesVendidas = unidadesVendidas;
+        this.ingresosGenerados = ingresosGenerados;
     }
 
-    public Long getIdProducto() { 
-        return idproducto; 
+    public Long getIdProducto() {
+        return idProducto;
     }
-    public String getNombreProducto() { 
-        return nombreproducto; 
+
+    public String getNombreProducto() {
+        return nombreProducto;
     }
-    public Long getUnidadesVendidas() { 
-        return unidadesvendidas; 
+
+    public Long getUnidadesVendidas() {
+        return unidadesVendidas;
     }
-    public BigDecimal getIngresosGenerados() { 
-        return ingresosgenerados; 
+
+    public BigDecimal getIngresosGenerados() {
+        return ingresosGenerados;
     }
+
+    
 }

@@ -2,6 +2,7 @@ package co.edu.unbosque.tallerrendimientowebflux.repository;
 
 import java.math.BigDecimal;
 
+import org.springframework.data.r2dbc.repository.Modifying;
 import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import org.springframework.data.repository.query.Param;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import co.edu.unbosque.tallerrendimientowebflux.model.Producto;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Repository
 public interface ProductoReactiveRepository extends R2dbcRepository<Producto, Integer> {
@@ -41,4 +43,8 @@ public interface ProductoReactiveRepository extends R2dbcRepository<Producto, In
         WHERE p.cantidad_producto < :cantidad
         """)
     Flux<Producto> findLowStockProductsBase(@Param("cantidad") Integer cantidad);
+
+    @Modifying
+    @Query("UPDATE producto SET cantidad_producto = cantidad_producto + :cantidad WHERE id_producto = :idProducto")
+    Mono<Integer> sumarStockPorIdProducto(Integer idProducto, Integer cantidad);
 }
