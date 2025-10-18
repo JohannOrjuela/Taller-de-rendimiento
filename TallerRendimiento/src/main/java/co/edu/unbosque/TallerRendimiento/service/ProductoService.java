@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import co.edu.unbosque.TallerRendimiento.dto.ComentarioDTO;
@@ -46,12 +48,14 @@ public class ProductoService {
         this.usuarioRepository = usuarioRepository;
     }
 
-    public List<ProductoDTO> searchProducts(String query, String category, BigDecimal minPrice) {
-        List<Producto> productos = productoRepository.searchProducts(query, category, minPrice);
+    public Page<ProductoDTO> searchProducts(String query, String category, BigDecimal minPrice, Pageable pageable) { 
+        
+        Page<Producto> productosPage = productoRepository.searchProducts(
+            query, category, minPrice, pageable 
+        );
 
-        return productos.stream()
-                .map(this::mapToProductoDTO)
-                .collect(Collectors.toList());
+        // Retorna la página mapeada
+        return productosPage.map(this::mapToProductoDTO);
     }
 
     public DetalleProductoDTO getProductDetails(Integer id) {
@@ -66,13 +70,12 @@ public class ProductoService {
         return mapToDetalleProductoDTO(producto, promedio, conteo, comentarios); 
     }
     
-    public List<ProductoDTO> getLowStockProducts(Integer threshold) {
+    public Page<ProductoDTO> getLowStockProducts(Integer threshold, Pageable pageable) { 
         
-        List<Producto> lowStock = productoRepository.findByCantidadProductoLessThan(threshold);
+        Page<Producto> lowStock = productoRepository.findByCantidadProductoLessThan(threshold, pageable);
         
-        return lowStock.stream()
-                .map(this::mapToProductoDTO)
-                .collect(Collectors.toList());
+        // Retorna la página mapeada
+        return lowStock.map(this::mapToProductoDTO);
     }
 
 

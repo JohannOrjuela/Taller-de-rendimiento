@@ -1,9 +1,10 @@
 package co.edu.unbosque.TallerRendimiento.repository;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -25,12 +26,13 @@ Optional<Producto> findById(Integer id);
         "AND (LOWER(c.nombreCategoria) = LOWER(COALESCE(:category, c.nombreCategoria)) OR :category IS NULL) " +
         "AND (:minPrice IS NULL OR p.precioProducto >= :minPrice)")
   
-  List<Producto> searchProducts(
+  Page<Producto> searchProducts(
     @Param("query") String query,
     @Param("category") String category,
-    @Param("minPrice") BigDecimal minPrice);
+    @Param("minPrice") BigDecimal minPrice,
+    Pageable pageable);
 
-    List<Producto> findByCantidadProductoLessThan(Integer threshold);
+    Page<Producto> findByCantidadProductoLessThan(Integer threshold, Pageable pageable);
 
 
   @Modifying

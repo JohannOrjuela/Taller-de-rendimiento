@@ -1,7 +1,7 @@
 package co.edu.unbosque.TallerRendimiento.controller;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -15,6 +15,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
+
 
 @RestController
 @RequestMapping("/api/inventory")
@@ -33,11 +35,11 @@ public class InventarioController {
         responses = @ApiResponse(responseCode = "200", description = "Lista de productos con bajo stock.")
     )
     @GetMapping("/low-stock")
-    public ResponseEntity<List<ProductoDTO>> findLowStockProducts(
+    public ResponseEntity<Page<ProductoDTO>> findLowStockProducts(
             @Parameter(description = "Umbral máximo de stock para considerar un producto como 'bajo stock'.")
-            @RequestParam(defaultValue = "10") Integer threshold) {
+            @RequestParam(defaultValue = "10") Integer threshold, Pageable pageable) {
         
-        List<ProductoDTO> lowStock = productoService.getLowStockProducts(threshold);
+        Page<ProductoDTO> lowStock = productoService.getLowStockProducts(threshold, pageable);
         return ResponseEntity.ok(lowStock);
     }
 

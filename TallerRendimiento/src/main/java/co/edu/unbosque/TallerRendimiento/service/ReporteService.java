@@ -1,13 +1,14 @@
 package co.edu.unbosque.TallerRendimiento.service;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
 import co.edu.unbosque.TallerRendimiento.dto.ProductoReporteDTO;
 import co.edu.unbosque.TallerRendimiento.repository.TransInventarioRepository;
-
-import org.springframework.stereotype.Service;
-import java.time.LocalDate;
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class ReporteService {
@@ -18,13 +19,11 @@ public class ReporteService {
         this.transInventarioRepository = transInventarioRepository;
     }
 
-    public List<ProductoReporteDTO> getTopSellingProducts(LocalDate startDate) {
+    public Page<ProductoReporteDTO> getTopSellingProducts(LocalDate startDate, Pageable pageable) {
         
-        List<Object[]> reporteData = transInventarioRepository.findTopSellingReportData(startDate);
+        Page<Object[]> reporteData = transInventarioRepository.findTopSellingReportData(startDate, pageable);
 
-        return reporteData.stream()
-            .map(this::mapToObjectArrayToDTO)
-            .collect(Collectors.toList());
+        return reporteData.map(this::mapToObjectArrayToDTO);
     }
     
 

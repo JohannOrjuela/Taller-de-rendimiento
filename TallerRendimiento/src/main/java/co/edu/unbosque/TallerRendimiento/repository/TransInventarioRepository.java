@@ -1,8 +1,9 @@
 package co.edu.unbosque.TallerRendimiento.repository;
 
 import java.time.LocalDate;
-import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -22,8 +23,7 @@ public interface TransInventarioRepository extends JpaRepository<TransInventario
                 "WHERE ti.tipo_trans_inventario = 'Venta' " +
                 "AND ti.fecha_trans_inventario::DATE >= :startDate " +
                 "GROUP BY p.id_producto, p.nombre_producto " +
-                "ORDER BY unidades DESC " +
-                "LIMIT 10", nativeQuery = true)
-    List<Object[]> findTopSellingReportData(@Param("startDate") LocalDate startDate);
+                "ORDER BY unidades DESC ", nativeQuery = true)
+    Page<Object[]> findTopSellingReportData(@Param("startDate") LocalDate startDate, Pageable pageable);
 
 }
