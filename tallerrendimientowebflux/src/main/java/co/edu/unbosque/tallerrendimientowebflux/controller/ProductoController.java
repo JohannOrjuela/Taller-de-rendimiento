@@ -56,7 +56,7 @@ public class ProductoController {
             @ApiResponse(responseCode = "500", description = "Error interno del servidor.")
         }
     )
-    @GetMapping("/{id}")
+    @GetMapping("/{id}/details")
     public Mono<DetalleProductoDTO> obtenerDetallesPorId(
             @Parameter(description = "ID del producto a buscar.")
             @PathVariable Integer id) {

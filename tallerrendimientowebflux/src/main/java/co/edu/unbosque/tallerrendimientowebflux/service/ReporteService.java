@@ -1,41 +1,44 @@
 package co.edu.unbosque.tallerrendimientowebflux.service;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
-
-import org.springframework.http.HttpStatus;
+import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import co.edu.unbosque.tallerrendimientowebflux.dto.ProductoReporteDTO;
-import co.edu.unbosque.tallerrendimientowebflux.repository.TransInventarioReactiveRepository;
 import reactor.core.publisher.Flux;
 
 @Service
 public class ReporteService {
 
-    private final TransInventarioReactiveRepository transInventarioRepository;
+    private final DatabaseClient databaseClient;
 
-    public ReporteService(TransInventarioReactiveRepository transInventarioRepository) {
-        this.transInventarioRepository = transInventarioRepository;
+    public ReporteService(DatabaseClient databaseClient) {
+        this.databaseClient = databaseClient;
     }
 
-    // -----------------------------------------------------------------
-    //TOP VENTAS POR FECHA EXACTA (/reports/top-selling/by-date)
-    // -----------------------------------------------------------------
-    public Flux<ProductoReporteDTO> findTopSellingProductsByExactDate(String startDate) { 
-        try {
-            LocalDate startDateString = LocalDate.parse(startDate);
-            return transInventarioRepository.findTopSellingProducts(startDate); 
-        
-        } catch (DateTimeParseException e) {
+    public Flux<ProductoReporteDTO> getTopSellingProductsByExactDate(String startDate) {
+        String sql = """
+            SELECT 
+                p.id_producto,
+                p.nombre_producto,
+                SUM(ABS(ti.cantidad_trans_inventario)) AS unidades_vendidas,
+                SUM(ABS(ti.cantidad_trans_inventario) * p.precio_producto) AS ingresos_generados
+            FROM trans_inventario ti
+            JOIN producto p ON ti.id_producto = p.id_producto
+            WHERE UPPER(ti.tipo_trans_inventario) = 'VENTA'
+              AND ti.fecha_trans_inventario >= TO_DATE(:startDate, 'YYYY-MM-DD')
+            GROUP BY p.id_producto, p.nombre_producto, p.precio_producto
+            ORDER BY unidades_vendidas DESC
+            LIMIT 10
+        """;
 
-            throw new ResponseStatusException(
-                HttpStatus.BAD_REQUEST, 
-                "Formato de fecha inválido. Use el formato YYYY-MM-DD.", 
-                e
-            );
-        }
-        
+        return databaseClient.sql(sql)
+            .bind("startDate", startDate)
+            .map(row -> new ProductoReporteDTO(
+                row.get("id_producto", Long.class),
+                row.get("nombre_producto", String.class),
+                row.get("unidades_vendidas", Long.class),
+                row.get("ingresos_generados", Double.class)
+            ))
+            .all();
     }
 }

@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.reactive.TransactionalOperator; // Importación necesaria
 
 import co.edu.unbosque.tallerrendimientowebflux.dto.ComentarioDTO;
 import co.edu.unbosque.tallerrendimientowebflux.dto.DetalleProductoDTO;
@@ -32,124 +33,130 @@ public class ProductoService {
     private final SubcategoriaReactiveRepository subcategoriaRepository; 
     private final UsuarioReactiveRepository usuarioRepository;
     private final TransInventarioReactiveRepository transInventarioRepository;
+    private final TransactionalOperator operator; 
 
     public ProductoService(ProductoReactiveRepository productoRepository,
-                           CalificacionReactiveRepository calificacionRepository,
-                           ComentarioReactiveRepository comentarioRepository,
-                           SubcategoriaReactiveRepository subcategoriaRepository,
-                           UsuarioReactiveRepository usuarioRepository,
-                           TransInventarioReactiveRepository transInventarioRepository) {
+                            CalificacionReactiveRepository calificacionRepository,
+                            ComentarioReactiveRepository comentarioRepository,
+                            SubcategoriaReactiveRepository subcategoriaRepository,
+                            UsuarioReactiveRepository usuarioRepository,
+                            TransInventarioReactiveRepository transInventarioRepository,
+                            TransactionalOperator operator) { 
         this.productoRepository = productoRepository;
         this.calificacionRepository = calificacionRepository;
         this.comentarioRepository = comentarioRepository;
         this.subcategoriaRepository = subcategoriaRepository;
         this.usuarioRepository = usuarioRepository;
         this.transInventarioRepository = transInventarioRepository;
+        this.operator = operator; 
     }
 
     // -----------------------------------------------------------------
-    // 1. ENDPOINT GET: BÚSQUEDA GENERAL (/search)
+    // 1. ENDPOINT GET: BÚSQUEDA GENERAL (/search) - LECTURA
     // -----------------------------------------------------------------
     public Flux<ProductoDTO> searchProducts(String query, String category, Double minPrice) {
     
-    BigDecimal minPriceBD = (minPrice != null) ? BigDecimal.valueOf(minPrice) : null;
-    
-    return productoRepository.searchProductsBase(query, category, minPriceBD).flatMap(producto -> {
+        BigDecimal minPriceBD = (minPrice != null) ? BigDecimal.valueOf(minPrice) : null;
+        
+        return productoRepository.searchProductsBase(query, category, minPriceBD).flatMap(producto -> {
             
-        Integer idSub = producto.getIdSubcategoria();
-        Mono<Subcategoria> subMono;
-            if (idSub == null) {
-                subMono = Mono.just(new Subcategoria(null, null, null)); 
-            } else {
-                subMono = subcategoriaRepository.findById(idSub).defaultIfEmpty(new Subcategoria(idSub, "N/A", null)); 
-            }
+            Integer idSub = producto.getIdSubcategoria();
+            Mono<Subcategoria> subMono;
+                if (idSub == null) {
+                    subMono = Mono.just(new Subcategoria(null, null, null)); 
+                } else {
+                    subMono = subcategoriaRepository.findById(idSub).defaultIfEmpty(new Subcategoria(idSub, "N/A", null)); 
+                }
 
-            return Mono.zip(Mono.just(producto), subMono);
+                return Mono.zip(Mono.just(producto), subMono);
 
-        }).map(this::mapTupleToProductoDTO);
-}
+            }).map(this::mapTupleToProductoDTO);
+    }
     
     // -----------------------------------------------------------------
-    // 2. ENDPOINT GET: DETALLES POR ID
+    // 2. ENDPOINT GET: DETALLES POR ID - LECTURA
     // -----------------------------------------------------------------
-      public Mono<DetalleProductoDTO> obtenerDetallesPorId(Integer id) {
+        public Mono<DetalleProductoDTO> obtenerDetallesPorId(Integer id) {
 
-        Mono<Producto> productoMono = productoRepository.findById(id);
-        Mono<Double> promedioCalificacionMono = calificacionRepository.findAverageByProductoId(id).defaultIfEmpty(0.0);
-        Mono<Long> totalComentariosMono = calificacionRepository.countByIdProducto(id).defaultIfEmpty(0L);
-
-
-        Mono<List<ComentarioDTO>> comentariosMonoList = comentarioRepository.findByIdProducto(id).map(this::toComentarioDTOAnonymized).collectList();
-
-        Mono<Subcategoria> subcategoriaMono = productoMono.flatMap(p -> subcategoriaRepository.findById(p.getIdSubcategoria()));
-
-        Mono<String> categoriaNombreMono = subcategoriaMono.flatMap(s -> subcategoriaRepository.findCategoriaNombreById(s.getIdCategoria())).defaultIfEmpty("N/A");
+            Mono<Producto> productoMono = productoRepository.findById(id);
+            Mono<Double> promedioCalificacionMono = calificacionRepository.findAverageByProductoId(id).defaultIfEmpty(0.0);
+            Mono<Long> totalComentariosMono = calificacionRepository.countByIdProducto(id).defaultIfEmpty(0L);
 
 
-        return Mono.zip(
-            productoMono, promedioCalificacionMono, totalComentariosMono, comentariosMonoList, subcategoriaMono, categoriaNombreMono)
-            .map(tuple -> {
+            Mono<List<ComentarioDTO>> comentariosMonoList = comentarioRepository.findByIdProducto(id).map(this::toComentarioDTOAnonymized).collectList();
 
-                Producto p = tuple.getT1();
-                Double avg = tuple.getT2();
-                Long count = tuple.getT3();
-                List<ComentarioDTO> comentarios = tuple.getT4();
-                Subcategoria sub = tuple.getT5();
-                String catName = tuple.getT6();
+            Mono<Subcategoria> subcategoriaMono = productoMono.flatMap(p -> subcategoriaRepository.findById(p.getIdSubcategoria()));
 
-                return new DetalleProductoDTO(
+            Mono<String> categoriaNombreMono = subcategoriaMono.flatMap(s -> subcategoriaRepository.findCategoriaNombreById(s.getIdCategoria())).defaultIfEmpty("N/A");
 
-                    p.getIdProducto().longValue(), p.getNombreProducto(),  p.getDescripcionProducto(),p.getPrecioProducto().doubleValue(),
-                    p.getCantidadProducto(),sub.getNombreSubcategoria(),catName,avg,count,comentarios
-                );
 
-            });
+            return Mono.zip(
+    productoMono, promedioCalificacionMono, totalComentariosMono, comentariosMonoList, subcategoriaMono, categoriaNombreMono)
+    .map(tuple -> { 
+        // Desestructuración de la tupla
+        Producto p = tuple.getT1();
+        Double avg = tuple.getT2();
+        Long count = tuple.getT3();
+        List<ComentarioDTO> comentarios = tuple.getT4();
+        Subcategoria sub = tuple.getT5();
+        String catName = tuple.getT6();
 
-    }
+        return new DetalleProductoDTO(p.getIdProducto().longValue(), p.getNombreProducto(),
+                    p.getDescripcionProducto(),p.getPrecioProducto().doubleValue(),
+                        p.getCantidadProducto(),sub.getNombreSubcategoria(),catName,avg,count,comentarios
+                    );
+
+                });
+
+        }
 
     // -----------------------------------------------------------------
-    // 3. ENDPOINT GET: INVENTARIO BAJO STOCK (/low-stock)
+    // 3. ENDPOINT GET: INVENTARIO BAJO STOCK (/low-stock) - LECTURA
     // -----------------------------------------------------------------
     public Flux<ProductoDTO> findByCantidadProductoLessThan(Integer threshold) {
     
-    return productoRepository.findLowStockProductsBase(threshold) 
-        
-        .flatMap(producto -> {
+        return productoRepository.findLowStockProductsBase(threshold) 
             
-            Mono<Subcategoria> subMono = subcategoriaRepository.findById(producto.getIdSubcategoria()).defaultIfEmpty(
-                new Subcategoria(producto.getIdSubcategoria(), "N/A", null)); 
-            
-            return Mono.zip(Mono.just(producto), subMono);
-            
-        }).map(this::mapTupleToProductoDTO);
-}
-public Mono<Void> actualizarStockPorRecepcionUnitaria(Integer idProducto, Integer cantidadRecibida, Integer idUsuarioLogueado) {
-        // ... (El cuerpo del método está bien)
-        // ... (Aquí se usa transInventarioRepository.save(trans).then())
-        return usuarioRepository.findById(idUsuarioLogueado)
-             .switchIfEmpty(Mono.error(new IllegalArgumentException("Error de auditoría: Usuario no encontrado.")))
-             .flatMap(usuario -> 
-                 productoRepository.sumarStockPorIdProducto(idProducto, cantidadRecibida)
-                 .flatMap(filasActualizadas -> {
-                     if (filasActualizadas == 0) {
-                         return Mono.error(new RuntimeException("Producto no encontrado con ID: " + idProducto));
-                     }
-                     // 4. Crear el registro de TransInventario
-                     TransInventario trans = new TransInventario();
-                     trans.setIdProducto(idProducto);
-                     trans.setIdUsuario(idUsuarioLogueado);
-                     trans.setTipoTransInventario("Entrada");
-                     trans.setCantidadTransInventario(cantidadRecibida); 
-                     trans.setFechaTransInventario(LocalDate.now());
-                     trans.setDescripcionTransInventario("Recepción unitaria de mercancía (vía WebFlux).");
-                     
-                     // 5. Guardar la transacción y completar el flujo
-                     return transInventarioRepository.save(trans).then(); 
-                 })
-             );
+            .flatMap(producto -> {
+                
+                Mono<Subcategoria> subMono = subcategoriaRepository.findById(producto.getIdSubcategoria()).defaultIfEmpty(
+                    new Subcategoria(producto.getIdSubcategoria(), "N/A", null)); 
+                
+                return Mono.zip(Mono.just(producto), subMono);
+                
+            }).map(this::mapTupleToProductoDTO);
     }
+
     // -----------------------------------------------------------------
-    // MAPPERS PRIVADOS
+    // 4. ENDPOINT PUT: ACTUALIZAR STOCK - ESCRITURA TRANSACCIONAL
+    // -----------------------------------------------------------------
+    public Mono<Void> actualizarStockPorRecepcionUnitaria(Integer idProducto, Integer cantidadRecibida, Integer idUsuarioLogueado) {
+        
+        Mono<Void> transaccionFlow = usuarioRepository.findById(idUsuarioLogueado)
+            .switchIfEmpty(Mono.error(new IllegalArgumentException("Error de auditoría: Usuario no encontrado.")))
+            .flatMap(usuario -> 
+                productoRepository.sumarStockPorIdProducto(idProducto, cantidadRecibida) // 1. UPDATE
+                .flatMap(filasActualizadas -> {
+                    if (filasActualizadas == 0) {
+                        return Mono.error(new RuntimeException("Producto no encontrado con ID: " + idProducto));
+                    }
+                    TransInventario trans = new TransInventario();
+                    trans.setIdProducto(idProducto);
+                    trans.setIdUsuario(idUsuarioLogueado);
+                    trans.setTipoTransInventario("Entrada");
+                    trans.setCantidadTransInventario(cantidadRecibida); 
+                    trans.setFechaTransInventario(LocalDate.now());
+                    trans.setDescripcionTransInventario("Recepción unitaria de mercancía (vía WebFlux).");
+                    
+                    return transInventarioRepository.save(trans).then(); 
+                })
+            );
+       
+        return operator.execute(status -> transaccionFlow).then();
+    }
+    
+    // -----------------------------------------------------------------
+    // MAPPERS 
     // -----------------------------------------------------------------
 
     private ProductoDTO mapTupleToProductoDTO(Tuple2<Producto, Subcategoria> tuple) {

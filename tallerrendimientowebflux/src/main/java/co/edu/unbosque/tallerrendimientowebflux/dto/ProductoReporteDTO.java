@@ -1,18 +1,13 @@
 package co.edu.unbosque.tallerrendimientowebflux.dto;
 
-import java.math.BigDecimal;
-
-import org.springframework.data.annotation.PersistenceCreator;
-
 public class ProductoReporteDTO {
 
     private final Long idProducto;
     private final String nombreProducto;
-    private final Long unidadesVendidas; 
-    private final BigDecimal ingresosGenerados; 
-    
-    @PersistenceCreator
-    public ProductoReporteDTO(Long idProducto, String nombreProducto, Long unidadesVendidas, BigDecimal ingresosGenerados) {
+    private final Long unidadesVendidas;
+    private final Double ingresosGenerados;
+
+    public ProductoReporteDTO(Long idProducto, String nombreProducto, Long unidadesVendidas, Double ingresosGenerados) {
         this.idProducto = idProducto;
         this.nombreProducto = nombreProducto;
         this.unidadesVendidas = unidadesVendidas;
@@ -31,9 +26,7 @@ public class ProductoReporteDTO {
         return unidadesVendidas;
     }
 
-    public BigDecimal getIngresosGenerados() {
+    public Double getIngresosGenerados() {
         return ingresosGenerados;
     }
-
-    
 }

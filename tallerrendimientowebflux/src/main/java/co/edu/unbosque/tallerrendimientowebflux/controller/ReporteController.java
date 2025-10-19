@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RestController;
 import co.edu.unbosque.tallerrendimientowebflux.dto.ProductoReporteDTO;
 import co.edu.unbosque.tallerrendimientowebflux.service.ReporteService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import reactor.core.publisher.Flux;
@@ -35,11 +34,8 @@ public class ReporteController {
         }
     )
 
-    @GetMapping("/top-selling/by-date")
-    public Flux<ProductoReporteDTO> getTopSellingProductsByExactDate(
-            @Parameter(description = "Fecha inicial en formato YYYY-MM-DD.")
-            @RequestParam String startDate) {
-        
-        return reporteService.findTopSellingProductsByExactDate(startDate);
+     @GetMapping("/top-selling")
+    public Flux<ProductoReporteDTO> getTopSellingProductsByExactDate(@RequestParam String startDate) {
+        return reporteService.getTopSellingProductsByExactDate(startDate);
     }
 }
